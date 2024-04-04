@@ -25,6 +25,11 @@ console.log("\x1b[31m%s\x1b[0m", `       made by insert.r on discord`);
 const readline = require('readline');
 const axios = require('axios');
 
+function cleanInput(text) {
+    // Supprimer les retours à la ligne et autres caractères indésirables
+    return text.trim();
+}
+
 function blue(text) {
     return '\x1b[34m' + text + '\x1b[0m';
 }
@@ -52,6 +57,23 @@ async function phoneLookup(phoneNumber) {
         console.log(green('Détails pour le numéro de téléphone ' + phoneNumber + ':'));
         console.log(green('Pays: France'));
         console.log(green('Opérateur: Orange'));
+        // Fermer l'interface readline
+        reLookup();
+    } catch (error) {
+        console.error('Une erreur est survenue :', error.message);
+    }
+}
+
+async function ipLookup(ipAddress) {
+    try {
+        const response = await axios.get(`http://ip-api.com/json/${ipAddress}`);
+        const data = response.data;
+        console.log(green(`IP Lookup pour : ${ipAddress}`));
+        console.log(green('Pays:'), data.country);
+        console.log(green('Ville:'), data.city);
+        console.log(green('Latitude:'), data.lat);
+        console.log(green('Longitude:'), data.lon);
+        // Ajoutez d'autres informations que vous souhaitez afficher
         reLookup();
     } catch (error) {
         console.error('Une erreur est survenue :', error.message);
@@ -65,8 +87,9 @@ function reLookup() {
     });
 
     rl.question(blue('Voulez-vous rechercher une autre adresse IP ou numéro de téléphone ? (Oui/Non) '), (response) => {
+        // Fermer l'interface readline
         rl.close();
-        response = response.trim().toLowerCase();
+        response = cleanInput(response.trim().toLowerCase());
         if (response === 'oui') {
             startSearch();
         } else if (response === 'non') {
@@ -85,15 +108,16 @@ function startSearch() {
     });
 
     rl.question('Choisissez une option du menu : ', (option) => {
+        option = cleanInput(option.trim());
         if (option === '1') {
             rl.question(blue('Entrez l\'adresse IP à rechercher : '), (ipAddress) => {
                 rl.close();
-                ipLookup(ipAddress.trim());
+                ipLookup(cleanInput(ipAddress.trim()));
             });
         } else if (option === '2') {
             rl.question(blue('Entrez le numéro de téléphone à rechercher : '), (phoneNumber) => {
                 rl.close();
-                phoneLookup(phoneNumber.trim());
+                phoneLookup(cleanInput(phoneNumber.trim()));
             });
         } else {
             console.log('Option invalide. Veuillez choisir une option valide.');
